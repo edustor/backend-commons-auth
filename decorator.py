@@ -4,7 +4,7 @@ import pkg_resources
 from commons_auth.auth import auth
 
 
-def requires_scope(*required_scopes):
+def requires_scope(*required_scopes_variants: list):
     def requires_scope_decorator(fn):
         def wrapper():
             if "Authorization" not in request.headers:
@@ -16,7 +16,12 @@ def requires_scope(*required_scopes):
             auth.account_id = payload['sub']
 
             scopes = payload["scope"].split(" ")
-            authorized = all(scope in scopes for scope in required_scopes)
+
+            authorized = False
+            for required_scopes in required_scopes_variants:
+                authorized = all(scope in scopes for scope in required_scopes)
+                if authorized:
+                    break
 
             if not authorized:
                 abort(403)
