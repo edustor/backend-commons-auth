@@ -1,6 +1,7 @@
 import jwt
 from flask import request, abort
 import pkg_resources
+from commons_auth.auth import auth
 
 
 def requires_scope(*required_scopes):
@@ -11,6 +12,9 @@ def requires_scope(*required_scopes):
             token = request.headers["Authorization"]
             key = pkg_resources.resource_string(__name__, "jwk.pub.pem")
             payload = jwt.decode(token, key=key, algorithms=["RS256"])
+
+            auth.account_id = payload['sub']
+
             scopes = payload["scope"].split(" ")
             authorized = all(scope in scopes for scope in required_scopes)
 
@@ -18,5 +22,7 @@ def requires_scope(*required_scopes):
                 abort(403)
 
             return fn()
+
         return wrapper
+
     return requires_scope_decorator
