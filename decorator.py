@@ -30,9 +30,8 @@ def requires_scope(*required_scopes):
 
             if not authorized:
                 abort(403)
-
             return fn()
-
+        wrapper.__name__ = fn.__name__
         return wrapper
 
     return requires_scope_decorator
